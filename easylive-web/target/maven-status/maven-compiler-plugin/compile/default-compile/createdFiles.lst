@@ -1,0 +1,4 @@
+com\easylive\web\controller\UserInfoController.class
+com\easylive\web\controller\AGlobalExceptionHandlerController.class
+com\easylive\web\controller\ABaseController.class
+com\easylive\web\EasyLiveWebRunApplication.class
