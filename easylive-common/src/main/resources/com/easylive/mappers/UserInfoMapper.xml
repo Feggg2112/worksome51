@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.easyjava.test.mappers.UserInfoMapper">
+<mapper namespace="com.easylive.mappers.UserInfoMapper">
 
 	<!--实体映射-->
-	<resultMap id="base_result_map" type="com.easyjava.test.entity.po.UserInfo">
+	<resultMap id="base_result_map" type="com.easylive.entity.po.UserInfo">
 		<!--用户id-->
 		<result column="user_info" property="userInfo"  />
 		<!--用户昵称-->
@@ -168,7 +168,7 @@
 	</select>
 
 	<!-- 插入 （匹配有值的字段）-->
-	<insert id="insert" parameterType="com.easyjava.test.entity.po.UserInfo">
+	<insert id="insert" parameterType="com.easylive.entity.po.UserInfo">
 		 INSERT INTO user_info
 		 <trim prefix="(" suffix=")" suffixOverrides="," >
 			<if test="bean.userInfo != null">
@@ -273,7 +273,7 @@
 	</insert>
 
 	<!-- 插入或者更新 （匹配有值的字段）-->
-	<insert id="insertOrUpdate" parameterType="com.easyjava.test.entity.po.UserInfo">
+	<insert id="insertOrUpdate" parameterType="com.easylive.entity.po.UserInfo">
 		 INSERT INTO user_info
 		 <trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="bean.userInfo != null">
@@ -429,7 +429,7 @@
 	</insert>
 
 	<!-- 添加 （批量插入）-->
-	<insert id="insertBatch" parameterType="com.easyjava.test.entity.po.UserInfo">
+	<insert id="insertBatch" parameterType="com.easylive.entity.po.UserInfo">
 		 INSERT INTO user_info(
 			 user_info,
 			 nickname,
@@ -471,7 +471,7 @@
 	</insert>
 
 	<!-- 批量新增修改 （批量插入）-->
-	<insert id="insertOrUpdateBatch" parameterType="com.easyjava.test.entity.po.UserInfo">
+	<insert id="insertOrUpdateBatch" parameterType="com.easylive.entity.po.UserInfo">
 		 INSERT INTO user_info(
 			 user_info,
 			 nickname,
@@ -530,7 +530,7 @@
 	</insert>
 
 	<!--多条件修改-->
-	<update id="updateByParam" parameterType="com.easyjava.test.entity.query.UserInfoQuery">
+	<update id="updateByParam" parameterType="com.easylive.entity.query.UserInfoQuery">
 		 UPDATE user_info u
  		 <set> 
 			<if test="bean.userInfo != null">
@@ -592,7 +592,7 @@
 	</delete>
 
 	<!-- 根据UserInfo修改-->
-	<update id="updateByUserInfo" parameterType="com.easyjava.test.entity.po.UserInfo">
+	<update id="updateByUserInfo" parameterType="com.easylive.entity.po.UserInfo">
 		 UPDATE user_info
  		 <set> 
 			<if test="bean.nickname != null">
@@ -655,7 +655,7 @@
 	</select>
 
 	<!-- 根据Email修改-->
-	<update id="updateByEmail" parameterType="com.easyjava.test.entity.po.UserInfo">
+	<update id="updateByEmail" parameterType="com.easylive.entity.po.UserInfo">
 		 UPDATE user_info
  		 <set> 
 			<if test="bean.userInfo != null">
@@ -718,7 +718,7 @@
 	</select>
 
 	<!-- 根据Nickname修改-->
-	<update id="updateByNickname" parameterType="com.easyjava.test.entity.po.UserInfo">
+	<update id="updateByNickname" parameterType="com.easylive.entity.po.UserInfo">
 		 UPDATE user_info
  		 <set> 
 			<if test="bean.userInfo != null">
