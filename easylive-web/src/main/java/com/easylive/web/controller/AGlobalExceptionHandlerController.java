@@ -1,4 +1,5 @@
 package com.easylive.web.controller;
+
 import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BusinessException;
@@ -14,6 +15,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class AGlobalExceptionHandlerController extends ABaseController {
@@ -35,7 +37,7 @@ public class AGlobalExceptionHandlerController extends ABaseController {
             ajaxResponse.setCode(biz.getCode() == null ? ResponseCodeEnum.CODE_600.getCode() : biz.getCode());
             ajaxResponse.setInfo(biz.getMessage());
             ajaxResponse.setStatus(STATUC_ERROR);
-        } else if (e instanceof BindException|| e instanceof MethodArgumentTypeMismatchException) {
+        } else if (e instanceof BindException || e instanceof MethodArgumentTypeMismatchException) {
             //参数类型错误
             ajaxResponse.setCode(ResponseCodeEnum.CODE_600.getCode());
             ajaxResponse.setInfo(ResponseCodeEnum.CODE_600.getMsg());
@@ -45,6 +47,11 @@ public class AGlobalExceptionHandlerController extends ABaseController {
             ajaxResponse.setCode(ResponseCodeEnum.CODE_601.getCode());
             ajaxResponse.setInfo(ResponseCodeEnum.CODE_601.getMsg());
             ajaxResponse.setStatus(STATUC_ERROR);
+        } else if (e instanceof ConstraintViolationException || e instanceof BindException) {
+            ajaxResponse.setCode(ResponseCodeEnum.CODE_600.getCode());
+            ajaxResponse.setInfo(ResponseCodeEnum.CODE_600.getMsg());
+            ajaxResponse.setStatus(STATUC_ERROR);
+
         } else {
             ajaxResponse.setCode(ResponseCodeEnum.CODE_500.getCode());
             ajaxResponse.setInfo(ResponseCodeEnum.CODE_500.getMsg());

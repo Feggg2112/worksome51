@@ -15,7 +15,7 @@ import java.io.Serializable;
  */
 public class UserInfo implements Serializable {
 
-
+	private String userId;
 	/**
 	 * 用户id
 	 */
@@ -229,6 +229,13 @@ public class UserInfo implements Serializable {
 		return this.theme;
 	}
 
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 	@Override
 	public String toString (){
 		return "用户id:"+(userInfo == null ? "空" : userInfo)+"，用户昵称:"+(nickname == null ? "空" : nickname)+"，用户邮箱:"+(email == null ? "空" : email)+"，密码:"+(password == null ? "空" : password)+"，0女1男2未知:"+(sex == null ? "空" : sex)+"，出生日期:"+(birthday == null ? "空" : birthday)+"，学校:"+(school == null ? "空" : school)+"，个人简介:"+(personIntroduction == null ? "空" : personIntroduction)+"，加入的时间:"+(joinTime == null ? "空" : DateUtil.format(joinTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern()))+"，最后登录时间:"+(lastLoginTime == null ? "空" : DateUtil.format(lastLoginTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern()))+"，最后登录IP:"+(lastLoginIp == null ? "空" : lastLoginIp)+"，0禁用1正常:"+(status == null ? "空" : status)+"，空间公告:"+(noticeInfo == null ? "空" : noticeInfo)+"，硬币总数量:"+(totalCoinCount == null ? "空" : totalCoinCount)+"，现在剩下的硬币:"+(currentCoinCount == null ? "空" : currentCoinCount)+"，主题:"+(theme == null ? "空" : theme);

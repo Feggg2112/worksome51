@@ -1,5 +1,9 @@
 package com.easylive.utils;
 import com.easylive.exception.BusinessException;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import sun.security.provider.MD5;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -49,5 +53,18 @@ public class StringTools {
             return true;
         }
         return false;
+    }
+
+    public static final String getRandomString(Integer count){
+        return RandomStringUtils.random(count, true, true);
+    }
+
+    public static final String getRandomNumber(Integer count){
+    	return RandomStringUtils.random(count,false,true);
+    }
+
+    public static final String encodeByMD5(String str) {
+        return StringTools.isEmpty(str) ? null : DigestUtils.md5Hex(str);// MD5加密
+        //写到了这边420 17：29
     }
 }
