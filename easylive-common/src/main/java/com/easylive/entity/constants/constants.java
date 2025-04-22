@@ -20,7 +20,7 @@ public class constants {
 
     public static String REDIS_KEY_CHECK_CODE = REDIS_KEY_PREFIX + "checkcode:";
 
-    public static String REDIS_KEY_TOKEN_WEB = REDIS_KEY_PREFIX + "token:";
+    public static String REDIS_KEY_TOKEN_WEB = REDIS_KEY_PREFIX + "token:web:";
 
-    public static String TOKEN_WEB = "token:";
+    public static String TOKEN_WEB = "token";
 }

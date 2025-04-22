@@ -83,26 +83,53 @@ public class AccountController extends ABaseController {
                             @NotEmpty String checkCodeKey,
                             @NotEmpty String checkCode
     ) {
-
+/**
+ *
+ * 登录，try下面一行我搞成全部都进了，我不懂为什么会抛出验证码异常，而且我验证码redis看里都是对的
+ * 解决了，apipost里参数设置成params了，应该是放在body里，一个是查询一个是请求体
+ */
         try {
             if (!checkCode.equalsIgnoreCase(redisComponent.getCheckCode(checkCodeKey))) {
                 throw new BusinessException("图片验证码不正确");
+
             }
 
             String ip = getIpAddr();
-            TokenUserInfoDto tokenUserInfoDto = userInfoService.login( email, password, ip );
+            TokenUserInfoDto tokenUserInfoDto = userInfoService.login(email, password, ip);
 
 
             saveToken2Cookie(response, tokenUserInfoDto.getToken());
             //TODO 设置粉丝数 关注数 硬币数
             //做到04——33：33，现在正在测试接口中，需要做一下测试，test@123456，test123456
 
-			return getSuccessResponseVO(tokenUserInfoDto);
+            return getSuccessResponseVO(tokenUserInfoDto);
         } finally {
             redisComponent.cleanCheckCode(checkCodeKey);
         }
 
     }
 
+    @RequestMapping("/autoLogin")
+    public ResponseVO autoLogin(HttpServletResponse response) {
+        //从redis拿到token,并且续费时间
+        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto();
+        if(tokenUserInfoDto == null){
+            return getSuccessResponseVO(null);
+        }
+        if(tokenUserInfoDto.getExpireAt() - System.currentTimeMillis() < constants.REDIS_KEY_EXPIRES_ONE_DAY ){
+            redisComponent.saveTokenInfo(tokenUserInfoDto);
+            saveToken2Cookie(response, tokenUserInfoDto.getToken());
+            return getSuccessResponseVO(tokenUserInfoDto);
+        }
+        saveToken2Cookie(response, tokenUserInfoDto.getToken());
+        return getSuccessResponseVO(tokenUserInfoDto);
+    }
+
+    @RequestMapping("/logout")
+    public ResponseVO logout(HttpServletResponse response) {
+        cleanCookie(response);
+        return getSuccessResponseVO(null);
+
+    }
 
 }

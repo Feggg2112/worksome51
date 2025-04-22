@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.dto.TokenUserInfoDto;
@@ -244,8 +246,10 @@ public class UserInfoServiceImpl implements UserInfoService {
 
 	}
 
+
+
 	@Override
-	public TokenUserInfoDto login(String email, String password, String ip) {
+	public TokenUserInfoDto login( String email, String password, String ip) {
 		UserInfo userInfo = this.userInfoMapper.selectByEmail(email);
 		if (null == userInfo || userInfo.getPassword().equals(password)) {
 			throw new BusinessException("账号或密码错误");
@@ -258,7 +262,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 		updateUserInfo.setLastLoginIp(ip);
 		this.userInfoMapper.updateByUserInfo(updateUserInfo, userInfo.getUserInfo());
 
-		TokenUserInfoDto tokenUserInfoDto = CopyTools.copy(updateUserInfo , TokenUserInfoDto.class);
+		TokenUserInfoDto tokenUserInfoDto = CopyTools.copy(userInfo , TokenUserInfoDto.class);
 
 		redisComponent.saveTokenInfo(tokenUserInfoDto);
 

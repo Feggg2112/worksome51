@@ -1,17 +1,23 @@
 package com.easylive.web.controller;
+import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.constants;
+import com.easylive.entity.dto.TokenUserInfoDto;
 import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BusinessException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
 public class ABaseController {
+
+    @Resource
+    private RedisComponent redisComponent;
 
     protected static final String STATUC_SUCCESS = "success";
 
@@ -83,5 +89,29 @@ public class ABaseController {
         cookie.setMaxAge(constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
         cookie.setPath("/");
         response.addCookie(cookie);
+    }
+
+    protected TokenUserInfoDto getTokenUserInfoDto(){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String token = request.getHeader(constants.TOKEN_WEB);
+        return redisComponent.getTokenInfo(token);
+    }
+
+    protected void cleanCookie(HttpServletResponse response){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        Cookie[] cookies = request.getCookies();
+        String token = null;
+        if(cookies == null){
+            return;
+        }
+        for (Cookie cookie : cookies ) {
+            if(cookie.getName().equals(constants.TOKEN_WEB)){
+                redisComponent.cleanToken(cookie.getValue());
+                cookie.setMaxAge(0);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+                break;
+            }
+        }
     }
 }

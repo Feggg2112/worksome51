@@ -33,4 +33,14 @@ public class RedisComponent {
         tokenUserInfoDto.setToken(token);
         redisUtils.set(constants.REDIS_KEY_TOKEN_WEB + token + tokenUserInfoDto , constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
     }
+
+    public TokenUserInfoDto getTokenInfo(String token){
+        return (TokenUserInfoDto) redisUtils.get(constants.REDIS_KEY_TOKEN_WEB + token);
+    }
+
+    public void cleanToken(String token){
+        redisUtils.delete(constants.REDIS_KEY_TOKEN_WEB + token);
+    }
+
+
 }
