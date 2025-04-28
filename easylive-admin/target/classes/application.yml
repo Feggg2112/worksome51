@@ -38,9 +38,10 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+  mapper-locations: classpath:com/easylive/mappers/*.xml
 
 project:
-  folder: c:/webser/easylive/
+  folder: D:/workspace/webser/easylive/
 log:
   root:
     level: debug
