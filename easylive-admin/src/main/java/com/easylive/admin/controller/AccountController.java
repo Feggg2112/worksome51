@@ -1,21 +1,17 @@
-package com.easylive.web.controller;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package com.easylive.admin.controller;
 
 import com.easylive.component.RedisComponent;
+import com.easylive.entity.config.AppConfig;
 import com.easylive.entity.constants.constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
-import com.easylive.entity.query.UserInfoQuery;
-import com.easylive.entity.po.UserInfo;
 import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BusinessException;
 import com.easylive.redis.RedisUtils;
 import com.easylive.service.UserInfoService;
 import com.easylive.utils.StringTools;
 import com.wf.captcha.ArithmeticCaptcha;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +23,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Controller
@@ -43,6 +41,8 @@ public class AccountController extends ABaseController {
 
     @Resource
     private RedisComponent redisComponent;
+    @Autowired
+    private AppConfig appConfig;
 
     @RequestMapping("/checkCode")
     public ResponseVO checkCode() {
@@ -59,30 +59,31 @@ public class AccountController extends ABaseController {
         return getSuccessResponseVO(result);//修改到这个
     }
 
-    @RequestMapping("/register")
-    public ResponseVO register(@NotEmpty @Email @Size(max = 150) String email,
-                               @NotEmpty @Size(max = 20) String nickName,
-                               @NotEmpty @Pattern(regexp = constants.REGEX_PASSWORD) String registerPassword,
-                               @NotEmpty String checkCodeKey,
-                               @NotEmpty String checkCode
-    ) {
-
-        try {
-            if (!checkCode.equalsIgnoreCase(redisComponent.getCheckCode(checkCodeKey))) {
-                throw new BusinessException("图片验证码不正确");
-            }
-            userInfoService.register(email, nickName, registerPassword);
-            return getSuccessResponseVO(null);
-        } finally {
-            redisComponent.cleanCheckCode(checkCodeKey);
-        }
-
-    }
+//    @RequestMapping("/register")
+//    public ResponseVO register(@NotEmpty @Email @Size(max = 150) String email,
+//                               @NotEmpty @Size(max = 20) String nickName,
+//                               @NotEmpty @Pattern(regexp = constants.REGEX_PASSWORD) String registerPassword,
+//                               @NotEmpty String checkCodeKey,
+//                               @NotEmpty String checkCode
+//    ) {
+//
+//        try {
+//            if (!checkCode.equalsIgnoreCase(redisComponent.getCheckCode(checkCodeKey))) {
+//                throw new BusinessException("图片验证码不正确");
+//            }
+//            userInfoService.register(email, nickName, registerPassword);
+//            return getSuccessResponseVO(null);
+//        } finally {
+//            redisComponent.cleanCheckCode(checkCodeKey);
+//        }
+//
+//    }
 
     @RequestMapping("/login")
-    public ResponseVO login(HttpServletResponse response,
+    public ResponseVO login(
                             HttpServletRequest request,
-                            @NotEmpty @Email String email,
+                            HttpServletResponse response,
+                            @NotEmpty String account,
                             @NotEmpty String password,
                             @NotEmpty String checkCodeKey,
                             @NotEmpty String checkCode
@@ -97,49 +98,45 @@ public class AccountController extends ABaseController {
                 throw new BusinessException("图片验证码不正确");
 
             }
+            if(!account.equals(appConfig.getAdminAccount())||!password.equals(StringTools.encodeByMD5(appConfig.getAdminPassword()))){
+                throw new BusinessException("账号或密码错误");
+            }
 
-            String ip = getIpAddr();
-            TokenUserInfoDto tokenUserInfoDto = userInfoService.login(email, password, ip);
-
-
-            saveToken2Cookie(response, tokenUserInfoDto.getToken());
-            //TODO 设置粉丝数 关注数 硬币数
-            //做到04——33：33，现在正在测试接口中，需要做一下测试，test@123456，test123456
-
-            return getSuccessResponseVO(tokenUserInfoDto);
+            String token = redisComponent.saveTokenInfo4Admin(account);
+            saveToken2Cookie(response, token);
+            return getSuccessResponseVO(account);
         } finally {
             redisComponent.cleanCheckCode(checkCodeKey);
             Cookie[] cookies = request.getCookies();
             if(cookies != null){
                 String token = null;
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(constants.TOKEN_WEB)) {
+                    if (cookie.getName().equals(constants.TOKEN_ADMIN)) {
                         token = cookie.getValue();
                     }
                 }
-                if(!StringTools.isEmpty(token)){
-                    redisComponent.cleanToken(token);
+                if (!StringUtils.isEmpty(token)) {
+                    redisComponent.cleanToken4Admin(token);
                 }
             }
         }
-
     }
 
-    @RequestMapping("/autoLogin")
-    public ResponseVO autoLogin(HttpServletResponse response) {
-        //从redis拿到token,并且续费时间
-        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto();
-        if(tokenUserInfoDto == null){
-            return getSuccessResponseVO(null);
-        }
-        if(tokenUserInfoDto.getExpireAt() - System.currentTimeMillis() < constants.REDIS_KEY_EXPIRES_ONE_DAY ){
-            redisComponent.saveTokenInfo(tokenUserInfoDto);
-            saveToken2Cookie(response, tokenUserInfoDto.getToken());
-            return getSuccessResponseVO(tokenUserInfoDto);
-        }
-        saveToken2Cookie(response, tokenUserInfoDto.getToken());
-        return getSuccessResponseVO(tokenUserInfoDto);
-    }
+//    @RequestMapping("/autoLogin")
+//    public ResponseVO autoLogin(HttpServletResponse response) {
+//        //从redis拿到token,并且续费时间
+//        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto();
+//        if(tokenUserInfoDto == null){
+//            return getSuccessResponseVO(null);
+//        }
+//        if(tokenUserInfoDto.getExpireAt() - System.currentTimeMillis() < constants.REDIS_KEY_EXPIRES_ONE_DAY ){
+//            redisComponent.saveTokenInfo(tokenUserInfoDto);
+//            saveToken2Cookie(response, tokenUserInfoDto.getToken());
+//            return getSuccessResponseVO(tokenUserInfoDto);
+//        }
+//        saveToken2Cookie(response, tokenUserInfoDto.getToken());
+//        return getSuccessResponseVO(tokenUserInfoDto);
+//    }
 
     @RequestMapping("/logout")
     public ResponseVO logout(HttpServletResponse response) {

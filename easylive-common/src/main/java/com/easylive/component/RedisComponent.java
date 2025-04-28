@@ -20,26 +20,43 @@ public class RedisComponent {
     }
 
     public String getCheckCode(String checkCodeKey) {
-        return (String)redisUtils.get(constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
+        return (String) redisUtils.get(constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
     }
 
     public void cleanCheckCode(String checkCodeKey) {
         redisUtils.delete(constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
     }
 
-    public void saveTokenInfo(TokenUserInfoDto tokenUserInfoDto){
+    public void saveTokenInfo(TokenUserInfoDto tokenUserInfoDto) {
         String token = UUID.randomUUID().toString();
         tokenUserInfoDto.setExpireAt(System.currentTimeMillis() + constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
         tokenUserInfoDto.setToken(token);
-        redisUtils.set(constants.REDIS_KEY_TOKEN_WEB + token + tokenUserInfoDto , constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
+        redisUtils.set(constants.REDIS_KEY_TOKEN_WEB + token + tokenUserInfoDto, constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
     }
 
-    public TokenUserInfoDto getTokenInfo(String token){
+    public TokenUserInfoDto getTokenInfo(String token) {
         return (TokenUserInfoDto) redisUtils.get(constants.REDIS_KEY_TOKEN_WEB + token);
     }
 
-    public void cleanToken(String token){
+    public String getToken4Admin(String token) {
+        return (String) redisUtils.get(constants.REDIS_KEY_TOKEN_ADMIN + token);
+    }
+
+    public String saveTokenInfo4Admin(String account) {
+
+        String token = UUID.randomUUID().toString();
+        redisUtils.setex(constants.REDIS_KEY_TOKEN_ADMIN + token, account, constants.REDIS_KEY_EXPIRES_ONE_DAY * 1);
+        return token;
+
+
+    }
+
+    public void cleanToken(String token) {
         redisUtils.delete(constants.REDIS_KEY_TOKEN_WEB + token);
+    }
+
+    public void cleanToken4Admin(String token) {
+        redisUtils.delete(constants.REDIS_KEY_TOKEN_ADMIN + token);
     }
 
 

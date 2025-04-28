@@ -1,0 +1,223 @@
+package com.easylive.service.impl;
+
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.List;
+import java.util.concurrent.ConcurrentSkipListMap;
+
+import javax.annotation.Resource;
+
+import com.easylive.exception.BusinessException;
+import org.springframework.stereotype.Service;
+
+import com.easylive.entity.enums.PageSize;
+import com.easylive.entity.query.CategoryInfoQuery;
+import com.easylive.entity.po.CategoryInfo;
+import com.easylive.entity.vo.PaginationResultVO;
+import com.easylive.entity.query.SimplePage;
+import com.easylive.mappers.CategoryInfoMapper;
+import com.easylive.service.CategoryInfoService;
+import com.easylive.utils.StringTools;
+import com.easylive.entity.constants.constants;
+
+
+/**
+ * 分类信息 业务接口实现
+ */
+@Service("categoryInfoService")
+public class CategoryInfoServiceImpl implements CategoryInfoService {
+
+    @Resource
+    private CategoryInfoMapper<CategoryInfo, CategoryInfoQuery> categoryInfoMapper;
+
+    /**
+     * 根据条件查询列表
+     */
+    @Override
+    public List<CategoryInfo> findListByParam(CategoryInfoQuery param) {
+        List<CategoryInfo> categoryInfoList = this.categoryInfoMapper.selectList(param);
+        if (param.getConvert2Tree() != null && param.getConvert2Tree()) {
+            categoryInfoList = convertLine2Tree(categoryInfoList, constants.ZERO);
+        }
+        return categoryInfoList;
+    }
+
+    private List<CategoryInfo> convertLine2Tree(List<CategoryInfo> dataList, Integer pid) {
+
+        List<CategoryInfo> children = new ArrayList<>();
+        for (CategoryInfo m : dataList) {
+            if (m.getCategoryId() != null && m.getpCategoryId() != null && m.getpCategoryId().equals(pid)) {
+                m.setChildren(convertLine2Tree(dataList, m.getCategoryId()));
+                children.add(m);
+            }
+        }
+        return children;
+    }
+
+    /**
+     * 根据条件查询列表
+     */
+    @Override
+    public Integer findCountByParam(CategoryInfoQuery param) {
+        return this.categoryInfoMapper.selectCount(param);
+    }
+
+    /**
+     * 分页查询方法
+     */
+    @Override
+    public PaginationResultVO<CategoryInfo> findListByPage(CategoryInfoQuery param) {
+        int count = this.findCountByParam(param);
+        int pageSize = param.getPageSize() == null ? PageSize.SIZE15.getSize() : param.getPageSize();
+
+        SimplePage page = new SimplePage(param.getPageNo(), count, pageSize);
+        param.setSimplePage(page);
+        List<CategoryInfo> list = this.findListByParam(param);
+        PaginationResultVO<CategoryInfo> result = new PaginationResultVO(count, page.getPageSize(), page.getPageNo(), page.getPageTotal(), list);
+        return result;
+    }
+
+    /**
+     * 新增
+     */
+    @Override
+    public Integer add(CategoryInfo bean) {
+        return this.categoryInfoMapper.insert(bean);
+    }
+
+    /**
+     * 批量新增
+     */
+    @Override
+    public Integer addBatch(List<CategoryInfo> listBean) {
+        if (listBean == null || listBean.isEmpty()) {
+            return 0;
+        }
+        return this.categoryInfoMapper.insertBatch(listBean);
+    }
+
+    /**
+     * 批量新增或者修改
+     */
+    @Override
+    public Integer addOrUpdateBatch(List<CategoryInfo> listBean) {
+        if (listBean == null || listBean.isEmpty()) {
+            return 0;
+        }
+        return this.categoryInfoMapper.insertOrUpdateBatch(listBean);
+    }
+
+    /**
+     * 多条件更新
+     */
+    @Override
+    public Integer updateByParam(CategoryInfo bean, CategoryInfoQuery param) {
+        StringTools.checkParam(param);
+        return this.categoryInfoMapper.updateByParam(bean, param);
+    }
+
+    /**
+     * 多条件删除
+     */
+    @Override
+    public Integer deleteByParam(CategoryInfoQuery param) {
+        StringTools.checkParam(param);
+        return this.categoryInfoMapper.deleteByParam(param);
+    }
+
+    /**
+     * 根据CategoryId获取对象
+     */
+    @Override
+    public CategoryInfo getCategoryInfoByCategoryId(Integer categoryId) {
+        return this.categoryInfoMapper.selectByCategoryId(categoryId);
+    }
+
+    /**
+     * 根据CategoryId修改
+     */
+    @Override
+    public Integer updateCategoryInfoByCategoryId(CategoryInfo bean, Integer categoryId) {
+        return this.categoryInfoMapper.updateByCategoryId(bean, categoryId);
+    }
+
+    /**
+     * 根据CategoryId删除
+     */
+    @Override
+    public Integer deleteCategoryInfoByCategoryId(Integer categoryId) {
+        return this.categoryInfoMapper.deleteByCategoryId(categoryId);
+    }
+
+    /**
+     * 根据CategoryCode获取对象
+     */
+    @Override
+    public CategoryInfo getCategoryInfoByCategoryCode(String categoryCode) {
+        return this.categoryInfoMapper.selectByCategoryCode(categoryCode);
+    }
+
+    /**
+     * 根据CategoryCode修改
+     */
+    @Override
+    public Integer updateCategoryInfoByCategoryCode(CategoryInfo bean, String categoryCode) {
+        return this.categoryInfoMapper.updateByCategoryCode(bean, categoryCode);
+    }
+
+    /**
+     * 根据CategoryCode删除
+     */
+    @Override
+    public Integer deleteCategoryInfoByCategoryCode(String categoryCode) {
+        return this.categoryInfoMapper.deleteByCategoryCode(categoryCode);
+    }
+
+    @Override
+    public void saveCategory(CategoryInfo bean) {
+        CategoryInfo dbBean = this.categoryInfoMapper.selectByCategoryCode(bean.getCategoryCode());
+        if (bean.getCategoryId() == null && dbBean != null ||
+                bean.getCategoryId() != null && dbBean != null && !bean.getCategoryId().equals(dbBean.getCategoryId())) {
+            throw new BusinessException("分类编号已经存在");
+        }
+        if (bean.getCategoryId() != null && dbBean != null && bean.getCategoryId().equals(dbBean.getCategoryId())) {
+            throw new BusinessException("修改内容与现内容相同");
+        }
+        if (bean.getCategoryId() == null) {
+            Integer maxSort = this.categoryInfoMapper.selectMaxSort(bean.getpCategoryId());
+            bean.setSort(maxSort == 0 ? 1 : maxSort + 1);
+            this.categoryInfoMapper.insert(bean);
+        } else {
+            this.categoryInfoMapper.updateByCategoryId(bean, bean.getCategoryId());
+        }
+    }
+
+    @Override
+    public void delCategory(Integer categoryId) {
+        //TODO 查询子分类，如果有视频，则不能删除
+
+
+        CategoryInfoQuery query = new CategoryInfoQuery();
+        query.setCategoryIdOrPCategoryId(categoryId);
+        categoryInfoMapper.deleteByParam(query);
+
+
+        //TODO 刷新缓存
+
+    }
+
+    @Override
+    public void changeSort(Integer pCategoryId, String categoryIds) {
+        String[] categoryIdArray = categoryIds.split(",");
+        List<CategoryInfo> categoryInfoList = new ArrayList<>();
+        Integer sort = 1;
+        for(String categoryId : categoryIdArray){
+            CategoryInfo categoryInfo = new CategoryInfo();
+            categoryInfo.setCategoryId(Integer.parseInt(categoryId));
+            categoryInfo.setpCategoryId(pCategoryId);
+            categoryInfo.setSort(++sort);
+            categoryInfoList.add(categoryInfo);
+        }
+        categoryInfoMapper.updateSortBatch(categoryInfoList);
+    }
+}

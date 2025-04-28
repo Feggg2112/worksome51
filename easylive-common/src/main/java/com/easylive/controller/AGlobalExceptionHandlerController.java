@@ -1,4 +1,4 @@
-package com.easylive.web.controller;
+package com.easylive.controller;
 
 import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.entity.vo.ResponseVO;
@@ -18,7 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 
 @RestControllerAdvice
-public class AGlobalExceptionHandlerController extends ABaseController {
+public class AGlobalExceptionHandlerController  {
+
+    private static final String STATUC_SUCCESS = "success";
+    private static final String STATUC_ERROR = "error";
 
     private static final Logger logger = LoggerFactory.getLogger(AGlobalExceptionHandlerController.class);
 
