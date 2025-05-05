@@ -2,10 +2,13 @@ package com.easylive.component;
 
 import com.easylive.entity.constants.constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.po.CategoryInfo;
 import com.easylive.redis.RedisUtils;
+import com.easylive.utils.StringTools;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -59,5 +62,16 @@ public class RedisComponent {
         redisUtils.delete(constants.REDIS_KEY_TOKEN_ADMIN + token);
     }
 
+    public void saveCategoryList(List<CategoryInfo> categoryInfoList){
+        redisUtils.set(constants.REDIS_KEY_CATEGORY_LIST,categoryInfoList);//永久保存的
+    }
+
+    public List<CategoryInfo> getCategoryList(){
+        return (List<CategoryInfo>) redisUtils.get(constants.REDIS_KEY_CATEGORY_LIST);
+    }
+
+    public void svePreVideoFileInfo(String userId, String fileName, Integer chunks) {
+        String uploadId = StringTools.getRandomString(constants.LENTH_15);
+    }
 
 }

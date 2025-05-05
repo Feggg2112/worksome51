@@ -49,4 +49,6 @@ public interface CategoryInfoMapper<T,P> extends BaseMapper<T,P> {
 
 	 void updateSortBatch(@Param("categoryInfoList") List<CategoryInfo> categoryInfoList);
 
+
+
 }

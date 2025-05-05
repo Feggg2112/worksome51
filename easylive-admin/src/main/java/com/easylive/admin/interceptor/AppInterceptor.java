@@ -57,7 +57,7 @@ public class AppInterceptor implements HandlerInterceptor {
         }
         String token = null;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(constants.TOKEN_WEB)) {
+            if (cookie.getName().equals(constants.TOKEN_ADMIN)) {
                 return cookie.getValue();
             }
         }

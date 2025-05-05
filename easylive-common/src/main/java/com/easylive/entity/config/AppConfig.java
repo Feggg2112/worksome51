@@ -5,6 +5,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AppConfig {
+
+    @Value("${showFFmpegLog:true}")
+    private Boolean showFFmpegLog;
+
     @Value("${project.folder:}")
     private String projectFolder;
 
@@ -13,6 +17,10 @@ public class AppConfig {
 
     @Value("${admin.password:}")
     private String adminPassword;
+
+    public Boolean getShowFFmpegLog() {
+        return showFFmpegLog;
+    }
 
     public String getProjectFolder() {
         return projectFolder;
