@@ -10,6 +10,10 @@ public class constants {
 
     public static final Integer LENTH_15 = 15;
 
+    public static final Long KB_SIZE = 1024L;
+
+    public static final Long MB_SIZE = 1024 * 1024L;
+
     public static final String REGEX_PASSWORD = "^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$%^&*_]{8,18}$";
 
     public static final Integer REDIS_KEY_EXPIRES_ONE_MIN = 60000;
@@ -41,5 +45,11 @@ public class constants {
     public static final String REDIS_KEY_CATEGORY_LIST = REDIS_KEY_PREFIX + "category:list:";
 
     public static final String IMAGE_THUMBNAIL_SUFFIX = "_thumbnail.jpg";
+
+    public static final String REDIS_KEY_UPLOADING_FILE = REDIS_KEY_PREFIX + "uploading:";
+
+    // 系统设置
+    public static final String REDIS_KEY_SYS_SETTING = REDIS_KEY_PREFIX + "sysSetting:";
+
 
 }

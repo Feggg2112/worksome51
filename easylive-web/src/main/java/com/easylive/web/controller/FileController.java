@@ -4,7 +4,9 @@ package com.easylive.web.controller;
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.config.AppConfig;
 import com.easylive.entity.constants.constants;
+import com.easylive.entity.dto.SysSettingDto;
 import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.dto.UploadingFileDto;
 import com.easylive.entity.enums.DateTimePatternEnum;
 import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.entity.vo.ResponseVO;
@@ -13,6 +15,7 @@ import com.easylive.utils.DateUtil;
 import com.easylive.utils.FFmpegUtils;
 import com.easylive.utils.StringTools;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,9 +74,47 @@ public class FileController extends ABaseController{
         }
     }
     @RequestMapping("/preUploadVideo")
-    public void preUploadVideo(@NotEmpty String fileName , @NotNull Integer chunks) {
+    public ResponseVO preUploadVideo(@NotEmpty String fileName , @NotNull Integer chunks) {
         TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto();
         //2025.5.5 增加上传文件 发布视频01 10分钟左右
+        String uploadId = redisComponent.svePreVideoFileInfo(tokenUserInfoDto.getUserId(), fileName, chunks);
+        return getSuccessResponseVO(uploadId);
     }
 
+    @RequestMapping("/uploadVideo")
+    public ResponseVO uploadVideo(@NotNull MultipartFile chunkFile, @NotNull Integer chunkIndex, @NotEmpty String uploadId) throws IOException {
+        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto();
+        UploadingFileDto fileDto = redisComponent.getUploadVideoFile(tokenUserInfoDto.getUserId(), uploadId);
+        if (fileDto == null) {
+            throw new BusinessException("文件不存在请重新上传");
+        }
+        SysSettingDto sysSettingDto = redisComponent.getSysSettingDto();
+        if (fileDto.getFileSize() > sysSettingDto.getVideoSize() * constants.MB_SIZE) {
+            throw new BusinessException("文件超过大小限制");
+        }
+
+        // 判断分片
+        if ((chunkIndex - 1) > fileDto.getChunkIndex() || chunkIndex > fileDto.getChunks() - 1) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
+
+        }
+        String folder = appConfig.getProjectFolder() +constants.FILE_FOLDER+ constants.FILE_FOLDER_TEMP + fileDto.getFilePath()+ "/";
+        File targetFile = new File(folder + "/" + chunkIndex);
+        chunkFile.transferTo(targetFile);
+        fileDto.setChunkIndex(chunkIndex);
+        fileDto.setFileSize(fileDto.getFileSize() + chunkFile.getSize());
+        redisComponent.updateVideoFileInfo(tokenUserInfoDto.getUserId(), fileDto);
+        return getSuccessResponseVO(null);
+    }
+    @RequestMapping("/delUploadVideo")
+    public ResponseVO delUploadVideo(@NotEmpty String uploadId) throws IOException {
+        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto();
+        UploadingFileDto fileDto = redisComponent.getUploadVideoFile(tokenUserInfoDto.getUserId(), uploadId);
+        if(fileDto == null){
+        throw new BusinessException("文件不存在请重新上传");
+        }
+        redisComponent.delVideoFileInfo(tokenUserInfoDto.getUserId(), uploadId);
+        FileUtils.deleteDirectory(new File(appConfig.getProjectFolder() +constants.FILE_FOLDER+ constants.FILE_FOLDER_TEMP + fileDto.getFilePath()));
+        return getSuccessResponseVO(uploadId);
+    }
 }

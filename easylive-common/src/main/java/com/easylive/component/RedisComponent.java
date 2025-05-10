@@ -1,13 +1,20 @@
 package com.easylive.component;
 
+import com.easylive.entity.config.AppConfig;
 import com.easylive.entity.constants.constants;
+import com.easylive.entity.dto.SysSettingDto;
 import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.dto.UploadingFileDto;
+import com.easylive.entity.enums.DateTimePatternEnum;
 import com.easylive.entity.po.CategoryInfo;
 import com.easylive.redis.RedisUtils;
+import com.easylive.utils.DateUtil;
 import com.easylive.utils.StringTools;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +23,8 @@ public class RedisComponent {
     @Resource
     private RedisUtils redisUtils;
 
+    @Resource
+    private AppConfig appConfig;
     public String saveCheckCode(String code) {
         String checkCodeKey = UUID.randomUUID().toString();
         redisUtils.setex(constants.REDIS_KEY_CHECK_CODE + checkCodeKey, code, constants.REDIS_KEY_EXPIRES_ONE_MIN * 10);
@@ -70,8 +79,45 @@ public class RedisComponent {
         return (List<CategoryInfo>) redisUtils.get(constants.REDIS_KEY_CATEGORY_LIST);
     }
 
-    public void svePreVideoFileInfo(String userId, String fileName, Integer chunks) {
+    public String svePreVideoFileInfo(String userId, String fileName, Integer chunks) {
         String uploadId = StringTools.getRandomString(constants.LENTH_15);
+        UploadingFileDto fileDto = new UploadingFileDto();
+        fileDto.setChunks(chunks);
+        fileDto.setFileName(fileName);
+        fileDto.setUploadId(uploadId);
+        fileDto.setChunkIndex(0);
+        String day = DateUtil.format(new Date(), DateTimePatternEnum.YYYYMMDD.getPattern());
+        String filePath = day + "/" + userId +  uploadId;
+        String folder = appConfig.getProjectFolder() + constants.FILE_FOLDER_TEMP + constants.FILE_FOLDER_TEMP + filePath;
+        File  folderFile = new File(folder);
+        if (!folderFile.exists()) {
+            folderFile.mkdirs();
+        }
+        fileDto.setFilePath(filePath);
+        redisUtils.setex(constants.REDIS_KEY_UPLOADING_FILE + userId +  uploadId  , fileDto, constants.REDIS_KEY_EXPIRES_ONE_DAY);
+        return uploadId;
     }
+
+    public UploadingFileDto getUploadVideoFile(String userId, String uploadId) {
+        return (UploadingFileDto) redisUtils.get(constants.REDIS_KEY_UPLOADING_FILE + userId + uploadId);
+    }
+
+    public SysSettingDto getSysSettingDto() {
+        SysSettingDto sysSettingDto = (SysSettingDto) redisUtils.get(constants.REDIS_KEY_SYS_SETTING);
+        if(sysSettingDto == null){
+            sysSettingDto = new SysSettingDto();
+        }
+        return sysSettingDto;
+    }
+
+    public void updateVideoFileInfo(String userId, UploadingFileDto fileDto) {
+        redisUtils.setex(constants.REDIS_KEY_UPLOADING_FILE + userId + fileDto.getUploadId(), fileDto , constants.REDIS_KEY_EXPIRES_ONE_DAY);
+    }
+
+    public void delVideoFileInfo(String userId, String uploadId) {
+        redisUtils.delete(constants.REDIS_KEY_UPLOADING_FILE + userId + uploadId);
+    }
+
+
 
 }
