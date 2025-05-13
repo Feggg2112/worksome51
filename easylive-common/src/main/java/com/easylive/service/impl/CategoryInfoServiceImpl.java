@@ -1,16 +1,12 @@
 package com.easylive.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 import javax.annotation.Resource;
 
 import com.easylive.component.RedisComponent;
 import com.easylive.exception.BusinessException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.easylive.entity.enums.PageSize;
@@ -21,7 +17,7 @@ import com.easylive.entity.query.SimplePage;
 import com.easylive.mappers.CategoryInfoMapper;
 import com.easylive.service.CategoryInfoService;
 import com.easylive.utils.StringTools;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 
 
 /**
@@ -42,7 +38,7 @@ public class CategoryInfoServiceImpl implements CategoryInfoService {
     public List<CategoryInfo> findListByParam(CategoryInfoQuery param) {
         List<CategoryInfo> categoryInfoList = this.categoryInfoMapper.selectList(param);
         if (param.getConvert2Tree() != null && param.getConvert2Tree()) {
-            categoryInfoList = convertLine2Tree(categoryInfoList, constants.ZERO);
+            categoryInfoList = convertLine2Tree(categoryInfoList, Constants.ZERO);
         }
         return categoryInfoList;
     }

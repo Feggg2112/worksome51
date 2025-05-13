@@ -1,7 +1,7 @@
 package com.easylive.admin.interceptor;
 
 import com.easylive.component.RedisComponent;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.exception.BusinessException;
 import com.easylive.utils.StringTools;
@@ -14,7 +14,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.logging.Handler;
 
 @Component
 public class AppInterceptor implements HandlerInterceptor {
@@ -34,7 +33,7 @@ public class AppInterceptor implements HandlerInterceptor {
             return true;
         }
 //获取图片
-        String token = request.getHeader(constants.TOKEN_ADMIN);
+        String token = request.getHeader(Constants.TOKEN_ADMIN);
 
         if(request.getRequestURI().contains("/file")){
             token = getTokenFromCookie(request);
@@ -57,7 +56,7 @@ public class AppInterceptor implements HandlerInterceptor {
         }
         String token = null;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(constants.TOKEN_ADMIN)) {
+            if (cookie.getName().equals(Constants.TOKEN_ADMIN)) {
                 return cookie.getValue();
             }
         }

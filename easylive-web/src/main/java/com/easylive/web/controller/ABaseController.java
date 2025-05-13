@@ -1,6 +1,6 @@
 package com.easylive.web.controller;
 import com.easylive.component.RedisComponent;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
 import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.entity.vo.ResponseVO;
@@ -85,15 +85,15 @@ public class ABaseController {
     }
 
     protected void saveToken2Cookie(HttpServletResponse response ,String token){
-        Cookie cookie = new Cookie(constants.TOKEN_WEB, token);
-        cookie.setMaxAge(constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
+        Cookie cookie = new Cookie(Constants.TOKEN_WEB, token);
+        cookie.setMaxAge(Constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
         cookie.setPath("/");
         response.addCookie(cookie);
     }
 
     protected TokenUserInfoDto getTokenUserInfoDto(){
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String token = request.getHeader(constants.TOKEN_WEB);
+        String token = request.getHeader(Constants.TOKEN_WEB);
         return redisComponent.getTokenInfo(token);
     }
 
@@ -105,7 +105,7 @@ public class ABaseController {
             return;
         }
         for (Cookie cookie : cookies ) {
-            if(cookie.getName().equals(constants.TOKEN_WEB)){
+            if(cookie.getName().equals(Constants.TOKEN_WEB)){
                 redisComponent.cleanToken(cookie.getValue());
                 cookie.setMaxAge(0);
                 cookie.setPath("/");

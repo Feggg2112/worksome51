@@ -1,7 +1,6 @@
 package com.easylive.admin.controller;
 import com.easylive.component.RedisComponent;
-import com.easylive.entity.constants.constants;
-import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BusinessException;
@@ -85,7 +84,7 @@ public class ABaseController {
     }
 
     protected void saveToken2Cookie(HttpServletResponse response ,String token){
-        Cookie cookie = new Cookie(constants.TOKEN_ADMIN, token);
+        Cookie cookie = new Cookie(Constants.TOKEN_ADMIN, token);
         cookie.setMaxAge(-1);//会话一结束就清除cookie
         cookie.setPath("/");
         response.addCookie(cookie);
@@ -100,7 +99,7 @@ public class ABaseController {
             return;
         }
         for (Cookie cookie : cookies ) {
-            if(cookie.getName().equals(constants.TOKEN_ADMIN)){
+            if(cookie.getName().equals(Constants.TOKEN_ADMIN)){
                 redisComponent.cleanToken(cookie.getValue());
                 cookie.setMaxAge(0);
                 cookie.setPath("/");

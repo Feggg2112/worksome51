@@ -1,21 +1,17 @@
 package com.easylive.web.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.easylive.component.RedisComponent;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
-import com.easylive.entity.query.UserInfoQuery;
-import com.easylive.entity.po.UserInfo;
 import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BusinessException;
 import com.easylive.redis.RedisUtils;
 import com.easylive.service.UserInfoService;
 import com.easylive.utils.StringTools;
 import com.wf.captcha.ArithmeticCaptcha;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,7 +58,7 @@ public class AccountController extends ABaseController {
     @RequestMapping("/register")
     public ResponseVO register(@NotEmpty @Email @Size(max = 150) String email,
                                @NotEmpty @Size(max = 20) String nickName,
-                               @NotEmpty @Pattern(regexp = constants.REGEX_PASSWORD) String registerPassword,
+                               @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD) String registerPassword,
                                @NotEmpty String checkCodeKey,
                                @NotEmpty String checkCode
     ) {
@@ -113,7 +109,7 @@ public class AccountController extends ABaseController {
             if(cookies != null){
                 String token = null;
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(constants.TOKEN_WEB)) {
+                    if (cookie.getName().equals(Constants.TOKEN_WEB)) {
                         token = cookie.getValue();
                     }
                 }
@@ -132,7 +128,7 @@ public class AccountController extends ABaseController {
         if(tokenUserInfoDto == null){
             return getSuccessResponseVO(null);
         }
-        if(tokenUserInfoDto.getExpireAt() - System.currentTimeMillis() < constants.REDIS_KEY_EXPIRES_ONE_DAY ){
+        if(tokenUserInfoDto.getExpireAt() - System.currentTimeMillis() < Constants.REDIS_KEY_EXPIRES_ONE_DAY ){
             redisComponent.saveTokenInfo(tokenUserInfoDto);
             saveToken2Cookie(response, tokenUserInfoDto.getToken());
             return getSuccessResponseVO(tokenUserInfoDto);

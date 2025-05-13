@@ -2,8 +2,7 @@ package com.easylive.admin.controller;
 
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.config.AppConfig;
-import com.easylive.entity.constants.constants;
-import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BusinessException;
 import com.easylive.redis.RedisUtils;
@@ -19,10 +18,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,7 +107,7 @@ public class AccountController extends ABaseController {
             if(cookies != null){
                 String token = null;
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(constants.TOKEN_ADMIN)) {
+                    if (cookie.getName().equals(Constants.TOKEN_ADMIN)) {
                         token = cookie.getValue();
                     }
                 }

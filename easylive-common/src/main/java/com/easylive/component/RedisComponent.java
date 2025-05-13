@@ -1,7 +1,7 @@
 package com.easylive.component;
 
 import com.easylive.entity.config.AppConfig;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.SysSettingDto;
 import com.easylive.entity.dto.TokenUserInfoDto;
 import com.easylive.entity.dto.UploadingFileDto;
@@ -21,66 +21,66 @@ import java.util.UUID;
 @Component
 public class RedisComponent {
     @Resource
-    private RedisUtils redisUtils;
+    private static RedisUtils redisUtils;
 
     @Resource
     private AppConfig appConfig;
     public String saveCheckCode(String code) {
         String checkCodeKey = UUID.randomUUID().toString();
-        redisUtils.setex(constants.REDIS_KEY_CHECK_CODE + checkCodeKey, code, constants.REDIS_KEY_EXPIRES_ONE_MIN * 10);
+        redisUtils.setex(Constants.REDIS_KEY_CHECK_CODE + checkCodeKey, code, Constants.REDIS_KEY_EXPIRES_ONE_MIN * 10);
         return checkCodeKey;
     }
 
     public String getCheckCode(String checkCodeKey) {
-        return (String) redisUtils.get(constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
+        return (String) redisUtils.get(Constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
     }
 
     public void cleanCheckCode(String checkCodeKey) {
-        redisUtils.delete(constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
+        redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
     }
 
     public void saveTokenInfo(TokenUserInfoDto tokenUserInfoDto) {
         String token = UUID.randomUUID().toString();
-        tokenUserInfoDto.setExpireAt(System.currentTimeMillis() + constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
+        tokenUserInfoDto.setExpireAt(System.currentTimeMillis() + Constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
         tokenUserInfoDto.setToken(token);
-        redisUtils.set(constants.REDIS_KEY_TOKEN_WEB + token + tokenUserInfoDto, constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
+        redisUtils.set(Constants.REDIS_KEY_TOKEN_WEB + token + tokenUserInfoDto, Constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
     }
 
     public TokenUserInfoDto getTokenInfo(String token) {
-        return (TokenUserInfoDto) redisUtils.get(constants.REDIS_KEY_TOKEN_WEB + token);
+        return (TokenUserInfoDto) redisUtils.get(Constants.REDIS_KEY_TOKEN_WEB + token);
     }
 
     public String getToken4Admin(String token) {
-        return (String) redisUtils.get(constants.REDIS_KEY_TOKEN_ADMIN + token);
+        return (String) redisUtils.get(Constants.REDIS_KEY_TOKEN_ADMIN + token);
     }
 
     public String saveTokenInfo4Admin(String account) {
 
         String token = UUID.randomUUID().toString();
-        redisUtils.setex(constants.REDIS_KEY_TOKEN_ADMIN + token, account, constants.REDIS_KEY_EXPIRES_ONE_DAY * 1);
+        redisUtils.setex(Constants.REDIS_KEY_TOKEN_ADMIN + token, account, Constants.REDIS_KEY_EXPIRES_ONE_DAY * 1);
         return token;
 
 
     }
 
     public void cleanToken(String token) {
-        redisUtils.delete(constants.REDIS_KEY_TOKEN_WEB + token);
+        redisUtils.delete(Constants.REDIS_KEY_TOKEN_WEB + token);
     }
 
     public void cleanToken4Admin(String token) {
-        redisUtils.delete(constants.REDIS_KEY_TOKEN_ADMIN + token);
+        redisUtils.delete(Constants.REDIS_KEY_TOKEN_ADMIN + token);
     }
 
     public void saveCategoryList(List<CategoryInfo> categoryInfoList){
-        redisUtils.set(constants.REDIS_KEY_CATEGORY_LIST,categoryInfoList);//永久保存的
+        redisUtils.set(Constants.REDIS_KEY_CATEGORY_LIST,categoryInfoList);//永久保存的
     }
 
     public List<CategoryInfo> getCategoryList(){
-        return (List<CategoryInfo>) redisUtils.get(constants.REDIS_KEY_CATEGORY_LIST);
+        return (List<CategoryInfo>) redisUtils.get(Constants.REDIS_KEY_CATEGORY_LIST);
     }
 
     public String svePreVideoFileInfo(String userId, String fileName, Integer chunks) {
-        String uploadId = StringTools.getRandomString(constants.LENTH_15);
+        String uploadId = StringTools.getRandomString(Constants.LENTH_15);
         UploadingFileDto fileDto = new UploadingFileDto();
         fileDto.setChunks(chunks);
         fileDto.setFileName(fileName);
@@ -88,22 +88,22 @@ public class RedisComponent {
         fileDto.setChunkIndex(0);
         String day = DateUtil.format(new Date(), DateTimePatternEnum.YYYYMMDD.getPattern());
         String filePath = day + "/" + userId +  uploadId;
-        String folder = appConfig.getProjectFolder() + constants.FILE_FOLDER_TEMP + constants.FILE_FOLDER_TEMP + filePath;
+        String folder = appConfig.getProjectFolder() + Constants.FILE_FOLDER_TEMP + Constants.FILE_FOLDER_TEMP + filePath;
         File  folderFile = new File(folder);
         if (!folderFile.exists()) {
             folderFile.mkdirs();
         }
         fileDto.setFilePath(filePath);
-        redisUtils.setex(constants.REDIS_KEY_UPLOADING_FILE + userId +  uploadId  , fileDto, constants.REDIS_KEY_EXPIRES_ONE_DAY);
+        redisUtils.setex(Constants.REDIS_KEY_UPLOADING_FILE + userId +  uploadId  , fileDto, Constants.REDIS_KEY_EXPIRES_ONE_DAY);
         return uploadId;
     }
 
     public UploadingFileDto getUploadVideoFile(String userId, String uploadId) {
-        return (UploadingFileDto) redisUtils.get(constants.REDIS_KEY_UPLOADING_FILE + userId + uploadId);
+        return (UploadingFileDto) redisUtils.get(Constants.REDIS_KEY_UPLOADING_FILE + userId + uploadId);
     }
 
-    public SysSettingDto getSysSettingDto() {
-        SysSettingDto sysSettingDto = (SysSettingDto) redisUtils.get(constants.REDIS_KEY_SYS_SETTING);
+    public static SysSettingDto getSysSettingDto() {
+        SysSettingDto sysSettingDto = (SysSettingDto) redisUtils.get(Constants.REDIS_KEY_SYS_SETTING);
         if(sysSettingDto == null){
             sysSettingDto = new SysSettingDto();
         }
@@ -111,11 +111,15 @@ public class RedisComponent {
     }
 
     public void updateVideoFileInfo(String userId, UploadingFileDto fileDto) {
-        redisUtils.setex(constants.REDIS_KEY_UPLOADING_FILE + userId + fileDto.getUploadId(), fileDto , constants.REDIS_KEY_EXPIRES_ONE_DAY);
+        redisUtils.setex(Constants.REDIS_KEY_UPLOADING_FILE + userId + fileDto.getUploadId(), fileDto , Constants.REDIS_KEY_EXPIRES_ONE_DAY);
     }
 
     public void delVideoFileInfo(String userId, String uploadId) {
-        redisUtils.delete(constants.REDIS_KEY_UPLOADING_FILE + userId + uploadId);
+        redisUtils.delete(Constants.REDIS_KEY_UPLOADING_FILE + userId + uploadId);
+    }
+
+    public void addFile2DelList(String videoId, List<String> filePathList){
+        redisUtils.lpushAll(Constants.REDIS_KEY_FILE_DEL+videoId,filePathList,Constants.TIME_SECONDS_ONE_DAY);
     }
 
 

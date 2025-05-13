@@ -3,7 +3,7 @@ package com.easylive.web.controller;
 
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.config.AppConfig;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.SysSettingDto;
 import com.easylive.entity.dto.TokenUserInfoDto;
 import com.easylive.entity.dto.UploadingFileDto;
@@ -41,7 +41,7 @@ public class FileController extends ABaseController{
     private AppConfig appConfig;
 
     @Resource
-    private FFmpegUtils ffmpegUtils;
+    private FFmpegUtils fFmpegUtils;
 
     @Resource
     private RedisComponent redisComponent;
@@ -58,7 +58,7 @@ public class FileController extends ABaseController{
     }
 
     protected void readFile(HttpServletResponse response, String filePath) {
-        File file = new File(appConfig.getProjectFolder() + constants.FILE_FOLDER + filePath);
+        File file = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER + filePath);
         if (!file.exists()) {
             return;
         }
@@ -89,7 +89,7 @@ public class FileController extends ABaseController{
             throw new BusinessException("文件不存在请重新上传");
         }
         SysSettingDto sysSettingDto = redisComponent.getSysSettingDto();
-        if (fileDto.getFileSize() > sysSettingDto.getVideoSize() * constants.MB_SIZE) {
+        if (fileDto.getFileSize() > sysSettingDto.getVideoSize() * Constants.MB_SIZE) {
             throw new BusinessException("文件超过大小限制");
         }
 
@@ -98,7 +98,7 @@ public class FileController extends ABaseController{
             throw new BusinessException(ResponseCodeEnum.CODE_600);
 
         }
-        String folder = appConfig.getProjectFolder() +constants.FILE_FOLDER+ constants.FILE_FOLDER_TEMP + fileDto.getFilePath()+ "/";
+        String folder = appConfig.getProjectFolder() + Constants.FILE_FOLDER+ Constants.FILE_FOLDER_TEMP + fileDto.getFilePath()+ "/";
         File targetFile = new File(folder + "/" + chunkIndex);
         chunkFile.transferTo(targetFile);
         fileDto.setChunkIndex(chunkIndex);
@@ -114,7 +114,27 @@ public class FileController extends ABaseController{
         throw new BusinessException("文件不存在请重新上传");
         }
         redisComponent.delVideoFileInfo(tokenUserInfoDto.getUserId(), uploadId);
-        FileUtils.deleteDirectory(new File(appConfig.getProjectFolder() +constants.FILE_FOLDER+ constants.FILE_FOLDER_TEMP + fileDto.getFilePath()));
+        FileUtils.deleteDirectory(new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER+ Constants.FILE_FOLDER_TEMP + fileDto.getFilePath()));
         return getSuccessResponseVO(uploadId);
     }
+
+    @RequestMapping("/uploadImage")
+    public ResponseVO uploadImage(@NotNull MultipartFile file, @NotNull Boolean createThumbnail) throws IOException {
+        String day = DateUtil.format(new Date(), DateTimePatternEnum.YYYYMMDD.getPattern());
+        String folder = appConfig.getProjectFolder() + Constants.FILE_FOLDER + Constants.FILE_COVER + day;
+        File folderFile = new File(folder);
+        if (!folderFile.exists()) {
+            folderFile.mkdirs();
+        }
+        String fileName = file.getOriginalFilename();
+        String fileSuffix = StringTools.getFileSuffix(fileName);
+        String realFileName = StringTools.getRandomString(Constants.LENGTH_30) + fileSuffix;
+        String filePath = folder + "/" + realFileName;
+        file.transferTo(new File(filePath));
+        if (createThumbnail != null && createThumbnail) {
+            fFmpegUtils.createImageThumbnail(filePath);
+        }
+        return getSuccessResponseVO( Constants.FILE_COVER + day + "/" + realFileName);
+    }
+
 }

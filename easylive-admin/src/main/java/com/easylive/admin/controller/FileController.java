@@ -14,7 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
@@ -40,7 +40,7 @@ public class FileController extends ABaseController{
     public ResponseVO uploadImage(@NotNull MultipartFile file,
                                   @NotNull Boolean createThumbnail) throws IOException {
         String month = DateUtil.format(new Date(), DateTimePatternEnum.YYYY_MM_DD.getPattern());
-        String folder = appConfig.getProjectFolder() + constants.FILE_FOLDER + constants.FILE_COVER + month;
+        String folder = appConfig.getProjectFolder() + Constants.FILE_FOLDER + Constants.FILE_COVER + month;
         File folderFile = new File(folder);
         if(!folderFile.exists()){
             folderFile.mkdirs();
@@ -54,7 +54,7 @@ public class FileController extends ABaseController{
             //fenlei3  31:00 2025 4.30 20.06
             ffmpegUtils.createImageThumbnail(filePath);
         }
-        return getSuccessResponseVO(constants.FILE_COVER + month + "/" + realFileName);
+        return getSuccessResponseVO(Constants.FILE_COVER + month + "/" + realFileName);
     }
 
     @RequestMapping("/getResource")
@@ -69,7 +69,7 @@ public class FileController extends ABaseController{
     }
 
     protected void readFile(HttpServletResponse response, String filePath) {
-        File file = new File(appConfig.getProjectFolder() + constants.FILE_FOLDER + filePath);
+        File file = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER + filePath);
         if (!file.exists()) {
             return;
         }

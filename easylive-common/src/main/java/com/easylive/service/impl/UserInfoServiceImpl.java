@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.dto.TokenUserInfoDto;
@@ -23,7 +21,7 @@ import com.easylive.entity.query.SimplePage;
 import com.easylive.mappers.UserInfoMapper;
 import com.easylive.service.UserInfoService;
 import com.easylive.utils.StringTools;
-import com.easylive.entity.constants.constants;
+import com.easylive.entity.constants.Constants;
 
 
 /**
@@ -227,7 +225,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 			throw new BusinessException("昵称已经存在");
 		}
 		userInfo = new UserInfo();
-		String userId = StringTools.getRandomNumber(constants.LENTH_10);
+		String userId = StringTools.getRandomNumber(Constants.LENTH_10);
 		userInfo.setUserInfo(userId);
 		userInfo.setNickname(nickName);
 		userInfo.setEmail(email);
@@ -235,9 +233,9 @@ public class UserInfoServiceImpl implements UserInfoService {
 		userInfo.setJoinTime(new Date());
 		userInfo.setStatus(UserStatusEnum.ENABLE.getStatus());
 		userInfo.setSex(UserSexEnum.SECRECY.getType());
-		userInfo.setTheme(constants.ONE);
-		userInfo.setCurrentCoinCount(constants.ONE);
-		userInfo.setTotalCoinCount(constants.ONE);
+		userInfo.setTheme(Constants.ONE);
+		userInfo.setCurrentCoinCount(Constants.ONE);
+		userInfo.setTotalCoinCount(Constants.ONE);
 		userInfo.setNoticeInfo("欢迎使用easylive");
 
 // TODO 初始化 用户的硬币

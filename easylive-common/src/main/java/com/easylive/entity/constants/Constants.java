@@ -1,6 +1,6 @@
 package com.easylive.entity.constants;
 
-public class constants {
+public class Constants {
 
     public static final Integer ONE = 1;
 
@@ -32,6 +32,9 @@ public class constants {
 
     public static final String REDIS_KEY_PREFIX = "easylive:";
 
+    public static final Integer LENGTH_30 = 30;
+    public static final Integer LENGTH_10 = 10;
+
     public static String REDIS_KEY_CHECK_CODE = REDIS_KEY_PREFIX + "checkcode:";
 
     public static String REDIS_KEY_TOKEN_WEB = REDIS_KEY_PREFIX + "token:web:";
@@ -47,9 +50,10 @@ public class constants {
     public static final String IMAGE_THUMBNAIL_SUFFIX = "_thumbnail.jpg";
 
     public static final String REDIS_KEY_UPLOADING_FILE = REDIS_KEY_PREFIX + "uploading:";
-
     // 系统设置
     public static final String REDIS_KEY_SYS_SETTING = REDIS_KEY_PREFIX + "sysSetting:";
+    //  文件删除列表
+    public static final String REDIS_KEY_FILE_DEL = REDIS_KEY_PREFIX + "file:list:del";
 
 
 }
